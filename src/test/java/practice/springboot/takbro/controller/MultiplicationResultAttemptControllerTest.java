@@ -1,6 +1,7 @@
 package practice.springboot.takbro.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,9 +19,12 @@ import practice.springboot.takbro.domain.MultiplicationResultAttempt;
 import practice.springboot.takbro.domain.User;
 import practice.springboot.takbro.service.MultiplicationService;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringRunner.class)
@@ -35,6 +39,7 @@ public class MultiplicationResultAttemptControllerTest {
 
     private JacksonTester<MultiplicationResultAttempt> jsonResult;
     private JacksonTester<MultiplicationResultAttempt> jsonResponse;
+    private JacksonTester<List<MultiplicationResultAttempt>> jsonResultAttemptList;
 
     @Before
     public void setUp() {
@@ -72,5 +77,30 @@ public class MultiplicationResultAttemptControllerTest {
         assertThat(response.getContentAsString()).isEqualTo(
                 jsonResponse.write(new MultiplicationResultAttempt(attempt.getUser(), attempt.getMultiplication(), attempt.getResultAttempt(), correct)).getJson()
         );
+    }
+
+    @Test
+    public void getUserStats() throws Exception {
+        // given
+        User user = new User("john_doe");
+        Multiplication multiplication = new Multiplication(50, 70);
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(
+                user, multiplication, 3500, true);
+        List<MultiplicationResultAttempt> recentAttempts = Lists.newArrayList(attempt, attempt);
+        given(multiplicationService
+                .getStatsForUser("john_doe"))
+                .willReturn(recentAttempts);
+
+        // when
+        MockHttpServletResponse response = mvc.perform(
+                get("/results").param("alias", "john_doe"))
+                .andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(
+                jsonResultAttemptList.write(
+                        recentAttempts
+                ).getJson());
     }
 }
