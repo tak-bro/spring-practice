@@ -1,5 +1,4 @@
 package practice.springboot.takbro.controller;
-import static practice.springboot.takbro.controller.MultiplicationResultAttemptController.ResultResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -22,7 +21,6 @@ import practice.springboot.takbro.service.MultiplicationService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringRunner.class)
@@ -36,7 +34,7 @@ public class MultiplicationResultAttemptControllerTest {
     private MockMvc mvc;
 
     private JacksonTester<MultiplicationResultAttempt> jsonResult;
-    private JacksonTester<ResultResponse> jsonResponse;
+    private JacksonTester<MultiplicationResultAttempt> jsonResponse;
 
     @Before
     public void setUp() {
@@ -61,7 +59,7 @@ public class MultiplicationResultAttemptControllerTest {
 
         User user = new User("John");
         Multiplication multiplication = new Multiplication(50, 70);
-        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(user, multiplication, 3500);
+        MultiplicationResultAttempt attempt = new MultiplicationResultAttempt(user, multiplication, 3500, correct);
 
         // when
         MockHttpServletResponse response = mvc.perform(post("/results")
@@ -71,8 +69,8 @@ public class MultiplicationResultAttemptControllerTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getContentAsString()).isEqualTo(jsonResponse.write(new ResultResponse(correct)).getJson());
+        assertThat(response.getContentAsString()).isEqualTo(
+                jsonResponse.write(new MultiplicationResultAttempt(attempt.getUser(), attempt.getMultiplication(), attempt.getResultAttempt(), correct)).getJson()
+        );
     }
-
-
 }

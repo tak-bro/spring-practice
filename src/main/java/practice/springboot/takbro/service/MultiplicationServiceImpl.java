@@ -1,5 +1,6 @@
 package practice.springboot.takbro.service;
 
+import org.springframework.util.Assert;
 import practice.springboot.takbro.domain.Multiplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,11 @@ public class MultiplicationServiceImpl implements MultiplicationService {
     }
 
     @Override
-    public boolean checkAttempt(final MultiplicationResultAttempt resultAttempt) {
-        return resultAttempt.getResultAttempt() == resultAttempt.getMultiplication().getFactorA() * resultAttempt.getMultiplication().getFactorB();
+    public boolean checkAttempt(final MultiplicationResultAttempt attempt) {
+        boolean isCorrect = attempt.getResultAttempt() == attempt.getMultiplication().getFactorA() * attempt.getMultiplication().getFactorB();
+        Assert.isTrue(!attempt.isCorrect(), "채점한 상태로 보낼 수 없습니다.");
+
+        MultiplicationResultAttempt checkAttempt = new MultiplicationResultAttempt(attempt.getUser(), attempt.getMultiplication(), attempt.getResultAttempt(), isCorrect);
+        return isCorrect;
     }
 }
