@@ -30,4 +30,5 @@ public final class Multiplication {
     Multiplication() {
         this(0, 0);
     }
+
 }

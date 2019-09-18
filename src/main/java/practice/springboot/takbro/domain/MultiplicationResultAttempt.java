@@ -35,4 +35,5 @@ public final class MultiplicationResultAttempt {
         resultAttempt = -1;
         correct = false;
     }
+
 }
