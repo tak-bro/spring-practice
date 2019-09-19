@@ -1,13 +1,13 @@
-package practice.springboot.takbro;
+package practice.springboot.gamification;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TakbroApplication {
+public class GamificationApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TakbroApplication.class, args);
+		SpringApplication.run(GamificationApplication.class, args);
 	}
 
 }
