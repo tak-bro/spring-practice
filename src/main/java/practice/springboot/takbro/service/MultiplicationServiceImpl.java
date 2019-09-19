@@ -1,11 +1,14 @@
 package practice.springboot.takbro.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import practice.springboot.takbro.domain.Multiplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import practice.springboot.takbro.domain.MultiplicationResultAttempt;
 import practice.springboot.takbro.domain.User;
+import practice.springboot.takbro.event.EventDispatcher;
+import practice.springboot.takbro.event.MultiplicationSolvedEvent;
 import practice.springboot.takbro.repository.MultiplicationResultAttemptRepository;
 import practice.springboot.takbro.repository.UserRepository;
 
@@ -18,14 +21,17 @@ public class MultiplicationServiceImpl implements MultiplicationService {
     private RandomGeneratorService randomGeneratorService;
     private MultiplicationResultAttemptRepository multiplicationResultAttemptRepository;
     private UserRepository userRepository;
+    private EventDispatcher eventDispatcher;
 
     @Autowired
     public MultiplicationServiceImpl(RandomGeneratorService randomGeneratorService,
                                      MultiplicationResultAttemptRepository multiplicationResultAttemptRepository,
-                                     UserRepository userRepository) {
+                                     UserRepository userRepository,
+                                     EventDispatcher eventDispatcher) {
         this.randomGeneratorService = randomGeneratorService;
         this.multiplicationResultAttemptRepository = multiplicationResultAttemptRepository;
         this.userRepository = userRepository;
+        this.eventDispatcher = eventDispatcher;
     }
 
     @Override
@@ -35,6 +41,7 @@ public class MultiplicationServiceImpl implements MultiplicationService {
         return new Multiplication(factorA, factorB);
     }
 
+    @Transactional
     @Override
     public boolean checkAttempt(final MultiplicationResultAttempt attempt) {
         // check user
@@ -52,6 +59,10 @@ public class MultiplicationServiceImpl implements MultiplicationService {
 
         // 답안 저장
         multiplicationResultAttemptRepository.save(checkAttempt);
+
+        // 이벤트 전송
+        MultiplicationSolvedEvent multiplicationSolvedEvent = new MultiplicationSolvedEvent(checkAttempt.getId(),checkAttempt.getUser().getId(), checkAttempt.isCorrect());
+        eventDispatcher.send(multiplicationSolvedEvent);
 
         return isCorrect;
     }
