@@ -1,6 +1,8 @@
 package practice.springboot.gamification.service;
 
 import org.springframework.stereotype.Service;
+import practice.springboot.gamification.client.MultiplicationResultAttemptClient;
+import practice.springboot.gamification.client.dto.MultiplicationResultAttempt;
 import practice.springboot.gamification.domain.Badge;
 import practice.springboot.gamification.domain.BadgeCard;
 import practice.springboot.gamification.domain.GameStats;
@@ -16,12 +18,18 @@ import java.util.stream.Collectors;
 @Service
 public class GameServiceImpl implements GameService {
 
+    public static final int LUCKY_NUMBER = 42;
+
     private ScoreCardRepository scoreCardRepository;
     private BadgeCardRepository badgeCardRepository;
+    private MultiplicationResultAttemptClient attemptClient;
 
-    GameServiceImpl(ScoreCardRepository scoreCardRepository, BadgeCardRepository badgeCardRepository) {
+    GameServiceImpl(ScoreCardRepository scoreCardRepository,
+                    BadgeCardRepository badgeCardRepository,
+                    MultiplicationResultAttemptClient attemptClient) {
         this.scoreCardRepository = scoreCardRepository;
         this.badgeCardRepository = badgeCardRepository;
+        this.attemptClient = attemptClient;
     }
 
 
@@ -62,6 +70,14 @@ public class GameServiceImpl implements GameService {
         if (isFirstWon) {
             BadgeCard firstWonBadge = this.giveBadgeToUser(Badge.FIRST_WON, userId);
             badgeCards.add(firstWonBadge);
+        }
+
+        // 행운의 숫자 배지
+        MultiplicationResultAttempt attempt = attemptClient.retrieveMultiplicationResultAttemptById(attemptId);
+        if (!containsBadge(badgeCardList, Badge.LUCKY_NUMBER) && (LUCKY_NUMBER == attempt.getMultiplicationFactorA()
+                || LUCKY_NUMBER == attempt.getMultiplicationFactorB())) {
+            BadgeCard luckyNumberBadge = giveBadgeToUser(Badge.LUCKY_NUMBER, userId);
+            badgeCards.add(luckyNumberBadge);
         }
 
         return badgeCards;
