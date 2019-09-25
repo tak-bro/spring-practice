@@ -10,6 +10,7 @@ import practice.springboot.takbro.domain.MultiplicationResultAttempt;
 import practice.springboot.takbro.service.MultiplicationService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/results")
@@ -44,6 +45,11 @@ public class MultiplicationResultAttemptController {
     @GetMapping
     ResponseEntity<List<MultiplicationResultAttempt>> getStatistics(@RequestParam("alias") String alias) {
         return ResponseEntity.ok(multiplicationService.getStatsForUser(alias));
+    }
+
+    @GetMapping("/{resultId}")
+    ResponseEntity<MultiplicationResultAttempt> getResultById(final @PathVariable("resultId") Long resultId) {
+        return ResponseEntity.ok(multiplicationService.getResultById(resultId));
     }
 
 }
